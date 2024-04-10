@@ -1,0 +1,20 @@
+<resources>
+    <!-- Common -->
+    <string name="app_name">Sber</string>
+    <string name="generic_error">Что-то случилось. Пожалуйста попробуйте ещё раз.</string>
+    <string name="try_again">Попробуй ещё раз</string>
+
+    <!-- Achievement -->
+    <string name="achievement_destination">Задачи</string>
+    <string name="day">День</string>
+    <string name="month">Месяц</string>
+    <string name="user_score">%.2f баллов = %.2f BYN</string>
+    <string name="complete">Выполнено</string>
+    <string name="lack_of_task">Сейчас у вас нет дневных СберЦелей. Следите за push-уведомлениями, чтобы не пропустить их!</string>
+
+    <!-- Panel -->
+    <string name="control_panel_destination">Панель управления</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_screen_destination">splash_screen</string>
+</resources>

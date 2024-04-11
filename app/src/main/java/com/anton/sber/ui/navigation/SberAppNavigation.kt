@@ -12,8 +12,7 @@ import androidx.navigation.compose.composable
 import com.anton.sber.ui.screen.achievement.AchievementDestination
 import com.anton.sber.ui.screen.achievement.AchievementScreen
 import com.anton.sber.ui.screen.achievement.AchievementViewModel
-import com.anton.sber.ui.screen.control_panel.ControlDialogScreen
-import com.anton.sber.ui.screen.control_panel.ControlPanelDestination
+import com.anton.sber.ui.screen.control_panel.ControlPanelViewModel
 import com.anton.sber.ui.screen.defaultScreen.FirstDefaultDestination
 import com.anton.sber.ui.screen.defaultScreen.FirstDefaultScreen
 import com.anton.sber.ui.screen.defaultScreen.SecondDefaultDestination
@@ -25,7 +24,8 @@ import com.anton.sber.ui.screen.splash.SplashScreenDestination
 fun SberAppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    achievementViewModel: AchievementViewModel
+    achievementViewModel: AchievementViewModel,
+    controlPanelViewModel: ControlPanelViewModel
 ) {
 
     var showDialog by rememberSaveable { mutableStateOf(false) }
@@ -47,14 +47,10 @@ fun SberAppNavigation(
         composable(route = AchievementDestination.route) {
             AchievementScreen(
                 achievementViewModel = achievementViewModel,
+                controlPanelViewModel = controlPanelViewModel,
                 navigateBack = {
                     navController.navigate(SecondDefaultDestination.route)
                 }
-            )
-        }
-        composable(route = ControlPanelDestination.route) {
-            ControlDialogScreen(
-                onDismissRequest = { showDialog = false }
             )
         }
         composable(route = FirstDefaultDestination.route) {

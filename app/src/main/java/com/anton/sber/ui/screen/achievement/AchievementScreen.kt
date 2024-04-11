@@ -11,12 +11,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,10 +35,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anton.sber.R
 import com.anton.sber.data.model.User
 import com.anton.sber.data.model.UserTask
 import com.anton.sber.ui.navigation.NavigationDestination
+import com.anton.sber.ui.screen.control_panel.ControlDialogScreen
+import com.anton.sber.ui.screen.control_panel.ControlPanelViewModel
 import com.anton.sber.ui.screen.defaultScreen.BackHeadline
 import com.anton.sber.ui.theme.SberTheme
 
@@ -57,6 +58,8 @@ object AchievementDestination : NavigationDestination {
 fun AchievementScreen(
     navigateBack: () -> Unit,
     achievementViewModel: AchievementViewModel = hiltViewModel(),
+    controlPanelViewModel: ControlPanelViewModel = hiltViewModel(),
+    activityViewModel: ActivityViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
 
@@ -68,6 +71,7 @@ fun AchievementScreen(
 
     var selectedList by rememberSaveable { mutableStateOf(monthlyTaskList) }
     var selectedScreenIsMonth by rememberSaveable { mutableStateOf(true) }
+    val showDialog = rememberSaveable { mutableStateOf(false) }
 
 //    LaunchedEffect(Unit) {
 //        achievementViewModel.loadInitialData()
@@ -85,8 +89,8 @@ fun AchievementScreen(
         )
 
         UserInformation(
-            amountOfPoints = user.value.amountOfPoints,
-            bankAccount = user.value.bankAccount
+            amountOfPoints = activityViewModel.getAmountOfPoints().toDouble(),
+            changeShowDialogParam = { showDialog.value = true }
         )
         TaskSelectionButtons(
             onMonthButtonClick = {
@@ -103,9 +107,17 @@ fun AchievementScreen(
         TaskList(
             tasks = selectedList.value,
             updateAmountOfPoints = {
+                activityViewModel.incrementAmountOfPoints(it)
                 achievementViewModel.updateUserAmountOfPoints(it)
             }
         )
+
+        if (showDialog.value) {
+            ControlDialogScreen(
+                onDismissRequest = { showDialog.value = false },
+                controlPanelViewModel = controlPanelViewModel
+            )
+        }
     }
 }
 
@@ -203,26 +215,21 @@ private fun TaskSelectionButtons(
 @Composable
 private fun UserInformation(
     amountOfPoints: Double,
-    bankAccount: String,
+    changeShowDialogParam: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = stringResource(R.string.user_score, amountOfPoints, amountOfPoints),
             style = MaterialTheme.typography.bodyMedium
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.CreditCard,
-                contentDescription = null
-            )
+        Button(onClick = { changeShowDialogParam() }) {
             Text(
-                text = bankAccount,
+                text = "пан. управления",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

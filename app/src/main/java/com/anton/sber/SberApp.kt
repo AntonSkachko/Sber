@@ -30,6 +30,7 @@ import com.anton.sber.ui.navigation.SberAppNavigation
 import com.anton.sber.ui.screen.achievement.AchievementDestination
 import com.anton.sber.ui.screen.achievement.AchievementViewModel
 import com.anton.sber.ui.screen.control_panel.ControlPanelDestination
+import com.anton.sber.ui.screen.control_panel.ControlPanelViewModel
 import com.anton.sber.ui.theme.SberTheme
 
 
@@ -39,6 +40,7 @@ fun SberApp(
 ) {
     val navController = rememberNavController()
     val achievementViewModel: AchievementViewModel = hiltViewModel()
+    val controlPanelViewModel: ControlPanelViewModel = hiltViewModel()
     var selectedTabIndex by rememberSaveable {
         mutableStateOf(AchievementDestination.route)
     }
@@ -46,13 +48,7 @@ fun SberApp(
     Scaffold(
         modifier = modifier,
         bottomBar = {
-            SberButtonNavigation(
-                onClick = {
-                    navController.navigate(it)
-                    selectedTabIndex = it
-                },
-                selectedTabIndex = selectedTabIndex
-            )
+            NavigationBar {}
         },
         topBar = { SberTopBar() }
     ) {
@@ -61,7 +57,8 @@ fun SberApp(
                 .fillMaxSize()
                 .padding(it),
             navController = navController,
-            achievementViewModel = achievementViewModel
+            achievementViewModel = achievementViewModel,
+            controlPanelViewModel = controlPanelViewModel
         )
     }
 }

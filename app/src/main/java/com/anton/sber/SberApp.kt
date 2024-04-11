@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -21,16 +17,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.anton.sber.ui.navigation.SberAppNavigation
 import com.anton.sber.ui.screen.achievement.AchievementDestination
 import com.anton.sber.ui.screen.achievement.AchievementViewModel
 import com.anton.sber.ui.screen.control_panel.ControlPanelDestination
+import com.anton.sber.ui.theme.SberTheme
 
 
 @Composable
@@ -80,22 +80,22 @@ fun SberTopBar(
                     .fillMaxWidth()
                     .padding(dimensionResource(R.dimen.padding_medium))
             ) {
-                // TODO add personal icons
                 Icon(
-                    imageVector = Icons.Filled.AddCircle,
-                    contentDescription = null
+                    painter = painterResource(id = R.drawable.sign),
+                    contentDescription = null,
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(
                         dimensionResource(R.dimen.padding_low)
-                    )
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Notifications,
+                        painter = painterResource(id = R.drawable.ring),
                         contentDescription = null
                     )
                     Icon(
-                        imageVector = Icons.Filled.ExitToApp,
+                        painter = painterResource(id = R.drawable.exit),
                         contentDescription = null
                     )
                 }
@@ -156,10 +156,10 @@ data class ButtonNavigationItemContent(
 )
 
 
-//@Composable
-//@Preview()
-//fun SberTopBarPreview() {
-//    SberTheme {
-//        SberTopBar()
-//    }
-//}
+@Composable
+@Preview()
+fun SberTopBarPreview() {
+    SberTheme {
+        SberTopBar()
+    }
+}

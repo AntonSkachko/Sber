@@ -1,5 +1,6 @@
 package com.anton.sber.ui.screen.defaultScreen
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -11,10 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.HeartBroken
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,8 +19,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anton.sber.R
@@ -61,17 +58,17 @@ fun FirstDefaultScreen(
         ) {
             RoutesItem(
                 text = "Избранные платежи",
-                imageVector = Icons.Filled.HeartBroken
+                painterRes = R.drawable.heart
             )
             RoutesItem(
                 text = "Программа лояльности",
-                imageVector = Icons.Filled.Star,
+                painterRes = R.drawable.star,
                 modifier = Modifier
                     .clickable { navigateTo() }
             )
             RoutesItem(
                 text = "Ерип",
-                imageVector = Icons.Filled.ArrowForward
+                painterRes = R.drawable.vector
             )
         }
         ProductPart()
@@ -111,7 +108,8 @@ fun ProductPart(
 fun RoutesItem(
     modifier: Modifier = Modifier,
     text: String,
-    imageVector: ImageVector
+    @DrawableRes
+    painterRes: Int
 ) {
     Card(
         modifier = modifier
@@ -130,7 +128,7 @@ fun RoutesItem(
                 dimensionResource(id = R.dimen.space_between))
         ) {
             Icon(
-                imageVector = imageVector,
+                painter = painterResource(painterRes),
                 contentDescription = null,
                 modifier.size(dimensionResource(id = R.dimen.first_size_of_icon))
             )

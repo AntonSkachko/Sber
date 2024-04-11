@@ -3,6 +3,7 @@ package com.anton.sber.data.repository.imp
 import android.util.Log
 import com.anton.sber.data.model.Task
 import com.anton.sber.data.model.enums.Period
+import com.anton.sber.data.model.enums.Type
 import com.anton.sber.data.repository.TaskRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -22,8 +23,9 @@ class TaskRepositoryImp @Inject constructor(
     private var currentDayIndex = 0
     private var currentMonthIndex = 0
 
-    private var lastDayTaskId: String? = null
-    private var lastMonthTaskId: String? = null
+    private var lastDayTaskId: String = collection.document().id
+    private var lastMonthTaskId: String = collection.document().id
+
 
     override fun getTaskStream(id: String): Flow<Task?> = flow {
         try {
@@ -35,21 +37,6 @@ class TaskRepositoryImp @Inject constructor(
         }
     }
 
-    override fun getAllTaskByPeriod(period: String): Flow<List<Task>?> = flow {
-        val tasks = mutableListOf<Task>()
-        try {
-            val query = collection
-                .whereEqualTo(PERIOD_FIELD, period)
-                .limit(LIMIT.toLong()).get().await()
-            for (doc in query.documents) {
-                val task = doc.toObject(Task::class.java)
-                task?.let { tasks.add(it) }
-            }
-            emit(tasks)
-        } catch (_: Exception) {
-            emit(emptyList())
-        }
-    }
 
 //    override fun getAllTasks(): Flow<List<Task>?> = flow {
 //        val tasks = mutableListOf<Task>()
@@ -98,46 +85,53 @@ class TaskRepositoryImp @Inject constructor(
         emit(mutableListOf())
     }
 
+    override fun getAllTasksByPeriod(period: Period): Flow<List<Task>?> = flow {
+        val tasks = mutableListOf<Task>()
+        val query = collection
+            .whereEqualTo(PERIOD_FIELD, period.name)
+            .get().await()
+
+        query.documents.shuffled()
+            .take(
+                if (period == Period.Month) 3
+                else 1
+            ).forEach { document ->
+                val task = document.toObject(Task::class.java)
+                task?.let { tasks.add(it) }
+            }
+
+        emit(tasks)
+    }.catch {
+        emit(mutableListOf())
+    }
+
+
     private suspend fun getNextDayTasks(): QuerySnapshot {
         val dayQuery = collection
+            .startAt(lastDayTaskId)
             .whereEqualTo(PERIOD_FIELD, Period.Day.name)
-            .limit(1)
+            .limit(1).get().await()
 
-        val query = if (lastDayTaskId != null) {
-            dayQuery.startAfter(lastDayTaskId!!)
-        } else {
-            dayQuery
-        }
+        lastDayTaskId = dayQuery.documents.last().id
 
-        val dayQuerySnapshot = query.get().await()
-
-        lastDayTaskId = dayQuerySnapshot.documents.lastOrNull()?.id
-
-        return dayQuerySnapshot
+        return dayQuery
     }
 
     private suspend fun getNextMonthTasks(): QuerySnapshot {
         val monthQuery = collection
+            .startAt(lastMonthTaskId)
             .whereEqualTo(PERIOD_FIELD, Period.Month.name)
-            .limit(3)
+            .limit(3).get().await()
 
-        val query = if (lastMonthTaskId != null) {
-            monthQuery.startAfter(lastMonthTaskId!!)
-        } else {
-            monthQuery
-        }
+        lastMonthTaskId = monthQuery.documents.last().reference.toString()
 
-        val monthQuerySnapshot = query.get().await()
-
-        lastMonthTaskId = monthQuerySnapshot.documents.lastOrNull()?.id
-        Log.i("GetNextMonthTasks ", lastMonthTaskId.toString())
-
-        return monthQuerySnapshot
+        return monthQuery
     }
 
     companion object {
         private const val TASKS = "tasks"
-        private const val LIMIT = 3
+        private const val MONTH_LIMIT = 3
+        private const val DAY_LIMIT = 1
         private const val RANDOM = "rand"
         private const val PERIOD_FIELD = "period"
     }

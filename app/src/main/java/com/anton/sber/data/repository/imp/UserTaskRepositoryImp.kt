@@ -1,6 +1,7 @@
 package com.anton.sber.data.repository.imp
 
 import android.util.Log
+import com.anton.sber.data.model.Task
 import com.anton.sber.data.model.UserTask
 import com.anton.sber.data.model.enums.Period
 import com.anton.sber.data.model.enums.Type
@@ -27,13 +28,12 @@ class UserTaskRepositoryImp @Inject constructor(
 ) : UserTaskRepository {
 
     private val uid = accountRepository.currentUserId
-//    private val userTaskRef = firestore
-//        .collection(USER)
-//        .document(uid)
-//        .collection(USER_TASKS)
+
+    private val dailyTaskList = taskRepository.getAllTasksByPeriod(Period.Day)
+    private val monthlyTaskList = taskRepository.getAllTasksByPeriod(Period.Month)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val dailyTasks: Flow<List<UserTask>>
+    override val userDailyTasks: Flow<List<UserTask>>
         get() =
             accountRepository.currentUser.flatMapLatest { user ->
                 firestore
@@ -42,24 +42,9 @@ class UserTaskRepositoryImp @Inject constructor(
                     .whereEqualTo(PERIOD, Period.Day.name)
                     .dataObjects()
             }
-//        get() = callbackFlow {
-//            val query =
-//                firestore.collection(USER)
-//                    .document(uid)
-//                    .collection(USER_TASKS)
-//                    .whereEqualTo(PERIOD, Period.Day.name)
-//            val snapshotListener =
-//                query.addSnapshotListener { snapshot, e ->
-//                    val userTasks = snapshot?.toObjects(UserTask::class.java)
-//                    trySend(userTasks ?: emptyList())
-//                }
-//            awaitClose {
-//                snapshotListener.remove()
-//            }
-//        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val monthlyTasks: Flow<List<UserTask>>
+    override val userMonthlyTasks: Flow<List<UserTask>>
         get() =
             accountRepository.currentUser.flatMapLatest { user ->
                 firestore
@@ -68,29 +53,15 @@ class UserTaskRepositoryImp @Inject constructor(
                     .whereEqualTo(PERIOD, Period.Month.name)
                     .dataObjects()
             }
-//        get() = callbackFlow {
-//            val query =
-//                firestore.collection(USER)
-//                    .document(uid)
-//                    .collection(USER_TASKS)
-//                    .whereEqualTo(PERIOD, Period.Month.name)
-//            val snapshotListener =
-//                query.addSnapshotListener { snapshot, e ->
-//                    val userTasks = snapshot?.toObjects(UserTask::class.java)
-//                    trySend(userTasks ?: emptyList())
-//                }
-//            awaitClose {
-//                snapshotListener.remove()
-//            }
-//        }
 
-
-    override suspend fun addOrUpdateUserTaskFromTasks() {
+    override suspend fun addOrUpdateUserTaskFromTasks(period: Period) {
         try {
-            clearUserTasks()
+            clearUserTasks(period)
 
-            val taskList = taskRepository
-                .getAllTasks().firstOrNull() ?: emptyList()
+            val taskList: List<Task> =
+                if (period == Period.Day) dailyTaskList.firstOrNull() ?: emptyList()
+                else monthlyTaskList.firstOrNull() ?: emptyList()
+
             val userTasks = mutableListOf<UserTask>()
 
             taskList.forEach { task ->
@@ -168,9 +139,10 @@ class UserTaskRepositoryImp @Inject constructor(
         }
     }
 
-    private suspend fun clearUserTasks() {
+    private suspend fun clearUserTasks(period: Period) {
         val userTaskQuery = firestore
             .collection(USER_TASKS)
+            .whereEqualTo(PERIOD, period.name)
             .get().await()
         for (doc in userTaskQuery.documents) {
             doc.reference.delete().await()

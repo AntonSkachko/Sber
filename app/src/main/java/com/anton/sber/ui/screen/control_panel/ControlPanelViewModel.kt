@@ -1,5 +1,6 @@
 package com.anton.sber.ui.screen.control_panel
 
+import com.anton.sber.data.model.enums.Period
 import com.anton.sber.data.model.enums.Type
 import com.anton.sber.data.repository.LogRepository
 import com.anton.sber.data.repository.UserTaskRepository
@@ -21,9 +22,9 @@ class ControlPanelViewModel @Inject constructor(
         }
     }
 
-    fun updateTasks() {
+    fun updateTasks(period: Period) {
         launchCatching {
-            userTaskRepository.addOrUpdateUserTaskFromTasks()
+            userTaskRepository.addOrUpdateUserTaskFromTasks(period)
         }
     }
 }

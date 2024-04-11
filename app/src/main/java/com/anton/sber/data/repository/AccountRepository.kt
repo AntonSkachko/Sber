@@ -10,5 +10,6 @@ interface AccountRepository {
 
     suspend fun authenticate(email: String, password: String)
     suspend fun createAnonymousAccount()
+    suspend fun updateUserAmountOfPoints(amountOfPoints: Double)
 
 }

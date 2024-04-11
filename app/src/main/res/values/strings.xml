@@ -17,4 +17,7 @@
 
     <!-- Splash Screen -->
     <string name="splash_screen_destination">splash_screen</string>
+
+    <!-- Default Screen -->
+    <string name="first_default_screen">first_screen</string>
 </resources>

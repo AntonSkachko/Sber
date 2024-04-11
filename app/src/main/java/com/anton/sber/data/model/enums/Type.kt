@@ -1,11 +1,15 @@
 package com.anton.sber.data.model.enums
 
-enum class Type {
-    RegularTransaction,
-    Cafe, Erip,
-    OnlineDelivery,
-    Store, Pharmacy,
-    Beauty;
+enum class Type(
+    public val russianName: String
+) {
+
+
+    RegularTransaction("Обычная транзакция"),
+    Cafe("Кафе"), Erip("Ерип"),
+    OnlineDelivery("Онлайн доставка"),
+    Store("Магазин"), Pharmacy("Аптека"),
+    Beauty("Красота и здоровье");
 
     companion object {
         fun getByName(name: String?): Type {
@@ -18,7 +22,7 @@ enum class Type {
             entries.forEach { type -> options.add(type.name) }
             return options
         }
-    }
 
+    }
 
 }

@@ -5,7 +5,20 @@
     <dimen name="button_shape">10dp</dimen>
     <dimen name="card_elevation">6dp</dimen>
 
+    <!-- Common -->
     <dimen name="padding_low">8dp</dimen>
     <dimen name="padding_medium">16dp</dimen>
     <dimen name="padding_large">32dp</dimen>
+
+    <!-- First Screen -->
+    <dimen name="size_of_box">160dp</dimen>
+    <dimen name="first_size_of_icon">32dp</dimen>
+    <dimen name="space_between">28dp</dimen>
+    <dimen name="first_height_of_card">250dp</dimen>
+
+    <!-- Second Screen -->
+    <dimen name="second_size_of_icon">20dp</dimen>
+    <dimen name="second_size_of_image">72dp</dimen>
+    <dimen name="second_height_of_card">160dp</dimen>
+    <dimen name="second_size_of_card">128dp</dimen>
 </resources>

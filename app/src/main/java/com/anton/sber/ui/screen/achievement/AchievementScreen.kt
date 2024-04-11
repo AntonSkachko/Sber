@@ -2,7 +2,6 @@ package com.anton.sber.ui.screen.achievement
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +41,7 @@ import com.anton.sber.R
 import com.anton.sber.data.model.User
 import com.anton.sber.data.model.UserTask
 import com.anton.sber.ui.navigation.NavigationDestination
+import com.anton.sber.ui.screen.defaultScreen.BackHeadline
 import com.anton.sber.ui.theme.SberTheme
 
 object AchievementDestination : NavigationDestination {
@@ -54,15 +55,16 @@ object AchievementDestination : NavigationDestination {
  */
 @Composable
 fun AchievementScreen(
+    navigateBack: () -> Unit,
     achievementViewModel: AchievementViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
 
 //    val uiState by achievementViewModel.achievementUiState.collectAsState()
     val user = achievementViewModel.user.collectAsStateWithLifecycle(User())
-    val monthlyTaskList = achievementViewModel.monthlyTaskList.collectAsStateWithLifecycle(emptyList())
+    val monthlyTaskList =
+        achievementViewModel.monthlyTaskList.collectAsStateWithLifecycle(emptyList())
     val dailyTaskList = achievementViewModel.dailyTaskList.collectAsStateWithLifecycle(emptyList())
-
 
     var selectedList by rememberSaveable { mutableStateOf(monthlyTaskList) }
     var selectedScreenIsMonth by rememberSaveable { mutableStateOf(true) }
@@ -76,6 +78,11 @@ fun AchievementScreen(
             .padding(dimensionResource(R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
+
+        BackHeadline(
+            navigateTo = { navigateBack() },
+            text = "СберЦели"
+        )
 
         UserInformation(
             amountOfPoints = user.value.amountOfPoints,
@@ -93,29 +100,34 @@ fun AchievementScreen(
             currentListIsMonth = selectedScreenIsMonth
         )
 
-        TaskList(tasks = selectedList.value)
+        TaskList(
+            tasks = selectedList.value,
+            updateAmountOfPoints = {
+                achievementViewModel.updateUserAmountOfPoints(it)
+            }
+        )
     }
 }
 
 @Composable
 private fun TaskList(
     tasks: List<UserTask>?,
+    updateAmountOfPoints: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (!tasks.isNullOrEmpty()) {
-        // todo hardcoded
-        Text(text = "28 дней")
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(R.dimen.padding_medium)
             ),
-            modifier = modifier.fillMaxSize(),
-            // todo try with it
-            contentPadding = PaddingValues(dimensionResource(R.dimen.padding_medium))
+            modifier = modifier
+                .fillMaxSize()
+                .padding(top = dimensionResource(id = R.dimen.padding_low))
         ) {
             items(tasks, key = { item -> item.id }) {
                 TaskItem(
                     task = it,
+                    updateAmountOfPoints = updateAmountOfPoints
                 )
             }
         }
@@ -127,7 +139,8 @@ private fun TaskList(
         ) {
             Text(
                 text = stringResource(id = R.string.lack_of_task),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -198,7 +211,8 @@ private fun UserInformation(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = stringResource(R.string.user_score, amountOfPoints, amountOfPoints)
+            text = stringResource(R.string.user_score, amountOfPoints, amountOfPoints),
+            style = MaterialTheme.typography.bodyMedium
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -208,30 +222,36 @@ private fun UserInformation(
                 contentDescription = null
             )
             Text(
-                text = bankAccount
+                text = bankAccount,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
     }
 }
 
-
-//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskItem(
     task: UserTask,
-//    onItemClick: (Int) -> Unit,
+    updateAmountOfPoints: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    if (task.progress == task.maxProgress) {
+        updateAmountOfPoints(task.score)
+    }
+
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+        ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = dimensionResource(id = R.dimen.card_elevation)
+            defaultElevation = 1.dp
         ),
         modifier = modifier,
         shape = RoundedCornerShape(
             dimensionResource(id = R.dimen.card_shape)
-        ),
-//        onClick = { onItemClick(task.id) }
+        )
     ) {
         Column(
             modifier = Modifier
@@ -257,9 +277,15 @@ private fun TaskItem(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text = task.name)
                     Text(
-                        text = task.description
+                        text = task.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = task.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
                     )
                 }
                 Column(
@@ -267,8 +293,16 @@ private fun TaskItem(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "+ ${task.score}")
-                    Text(text = "балла")
+                    Text(
+                        text = "+ ${task.score}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = "балла",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
                 }
             }
 
@@ -286,15 +320,17 @@ private fun TaskLinearIndicator(
     currentProgress: Int,
     maxProgress: Int
 ) {
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = if (currentProgress != maxProgress) {
+            text = if (currentProgress < maxProgress) {
                 "$currentProgress / $maxProgress"
             } else {
                 stringResource(id = R.string.complete)
-            }
+            },
+            style = MaterialTheme.typography.bodyMedium,
         )
         LinearProgressIndicator(
             progress = (currentProgress).toFloat() / (maxProgress).toFloat(),
@@ -312,8 +348,8 @@ fun TaskItemPreview() {
     SberTheme {
         TaskItem(
             task = UserTask(
-                name = "Кофебрейк",
-                description = "Сделайте 3 транзакции от 10 BYN в любимой кофейне.",
+                name = "Райское наслаждение",
+                description = "Сделайте покупку из категории Красота и здоровье от 30 BYN",
                 progress = 1,
                 maxProgress = 3,
                 score = 0.2,
@@ -321,7 +357,8 @@ fun TaskItemPreview() {
                 period = "month"
             ),
 //            onItemClick = {},
-            modifier = Modifier
+            modifier = Modifier,
+            updateAmountOfPoints = {}
         )
     }
 }
